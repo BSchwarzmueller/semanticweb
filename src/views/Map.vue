@@ -7,6 +7,7 @@
           @l-moveend="mapMoved">
         <v-tilelayer url="http://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png"></v-tilelayer>
         <v-marker-cluster :options="clusterOptions">
+          <!--  Marker zur Anzeige der Suchergebnisse auf der Karte -->
           <v-marker v-for="point in unis"
             :key="point.id"
             :options="point"
@@ -20,9 +21,13 @@
       <!-- <b-loading :active.sync="isLoading" :canCancel="false"></b-loading> -->
     </div>
     <div class="column is-narrow">
+      <!-- An dieser Stelle wird das Panel mit den Ergebnissen geladen 
+            Klassenvariable wird an das Template übergeben und Variable persons zugewiesen  
+      -->
       <gr-person-list :persons="unis"></gr-person-list>
     </div>
     <section>
+      <!-- Modal zur genauen Auflistung der gefunden Professoren für die Hochschule --> 
       <b-modal :active.sync="isModal" :width="640">
         <div class="card" v-if="modalPerson">
           <div class="card-content">
@@ -46,7 +51,7 @@
                     <b-icon icon="link"></b-icon>
                   </a>
                 </div>
-                <div layout="row center-justify" v-if="!isLoading">
+                <div layout="row center-justify" v-if="!isLoading"> <!-- Professoren erst anzeigen, wenn Laden beendet -->
                   <p class="title is-4">{{ modalProfs.length }} Professoren gefunden:</p>
                 </div>
                 <gr-prof-list
@@ -65,6 +70,7 @@
 </template>
 
 <script>
+  // Um Komponenten und Services nutzen zu können
   import L from 'leaflet';
   import ProfList from '@/components/ProfList';
   import PersonList from '@/components/PersonList';
@@ -81,22 +87,22 @@
   const wikidata = new Wikidata();
 
   /**
-   * Gets data from SPARQL endpoint
+   * Funktion zur Verarbeitung der Anfrage an Wikidata API
    */
   function getData(query) {
-    store.commit('load');
+    store.commit('load'); // setzt den active.state in der store.js auf 'isLoading' = true
 
     return wikidata
       .runQueries([query])
       .then((response) => {
-        store.commit('unload');
+        store.commit('unload'); // setzt den active.state in der store.js auf 'isLoading' = false
 
         const responses = [];
         response.forEach(resp => responses.push(...resp.data.results.bindings));
         return responses;
       })
       .catch((err) => {
-        store.commit('unload');
+        store.commit('unload'); // setzt den active.state in der store.js auf 'isLoading' = false
         console.error('Error getting data from SPARQL endpoint!', err);
         return [];
       });
@@ -114,7 +120,7 @@
   }
 
   /**
-   * Returns coordinates for SERVICE wikibase:box
+   * Ermittelt oberere rechte Ecke und untere Linke Ecke des Map-Ausschnitts für SERVICE wikibase:box
    */
   function getBBox() {
     const bbox = map.getBounds();
@@ -124,14 +130,14 @@
     return `
       bd:serviceParam wikibase:cornerWest ${cornerWest}.
       bd:serviceParam wikibase:cornerEast ${cornerEast}.`;
-  }
+  } // Wird dann per Funktionsaufruf in die Query geladen
 
   function getUnis() {
     return `SELECT ?university ?universityLabel ?location ?logo ?studentsCount ?employeesCount ?inception
             WHERE
             { 
               SERVICE wikibase:box {
-                  ?university wdt:P625 ?location . ${getBBox()}
+                  ?university wdt:P625 ?location . ${getBBox()} 
                 }
               ?university wdt:P31/wdt:P279* wd:Q38723 .
               ?university wdt:P154 ?logo .
@@ -140,7 +146,7 @@
                          ?university wdt:P571 ?inception .}
               SERVICE wikibase:label { bd:serviceParam wikibase:language "de"}
             }`;
-  }
+  } // Query für alle in der Karte sichtbaren Hochschulen, dynamische Koordinaten via getBBOX()
 
   function getMapPosition() {
     const center = map.getCenter();
@@ -176,22 +182,22 @@
   }
 
   /**
-   * Action fired after map move
+   * EVENT Handler wenn Karte bewegt wird
    */
   function mapMoved() {
-    const queryUnis = getUnis();
+    const queryUnis = getUnis(); // Neue Query wird erstellt mit aktuellen Koordinaten
 
     updateURL();
-    if (map.getZoom() < 10) { return; }
+    if (map.getZoom() < 10) { return; } // Verhindert Query bei zu großem Zoom-Faktor
 
     getData
-      .apply(this, [queryUnis])
+      .apply(this, [queryUnis]) // Muss ein Array sein, daher immer  []
       .then((data) => {
-        this.unis = data
+        this.unis = data // Ergebnis wird der Klassenvariable zugewiesen
           .filter(
             (element, index, array) =>
             array.findIndex(t => t.university.value === element.university.value) === index)
-          .map(uni => new University(uni));
+          .map(uni => new University(uni)); // Ergebnisse werden nach ID gefiltert und jeweils an den Klassen-Konstruktor übergeben
       });
   }
 
@@ -217,13 +223,15 @@
   }
 
   export default {
+    // Hier werden die verwendeten Komponenten (unter @/components/)
+    // Variablen zugewiesen, die wie HTML Attribute verwendet werden könenn  
     components: {
-      'gr-person-list': PersonList,
+      'gr-person-list': PersonList, 
       'gr-prof-list': ProfList,
     },
     data() {
       return {
-        unis: [],
+        unis: [], // Leeres Arrays für die Query Nr.1
         clusterOptions: {
           showCoverageOnHover: false,
           zoomToBoundsOnClick: true,
@@ -265,8 +273,8 @@
         get: () => store.state.isModal,
         set: value => store.commit('setModal', value),
       },
-      modalPerson() { return store.state.selectedPerson; },
-      modalProfs() { return store.state.selectedProfs; },
+      modalPerson() { return store.state.selectedPerson; }, // Zustände die in store gespeichert werden
+      modalProfs() { return store.state.selectedProfs; }, // können so beim Aufruf des Modals verwendet werden
     },
     methods: { getIcon, getMapPosition, mapMoved, showPopup, closePopup, initMapPosition },
     mounted: function mounted() {

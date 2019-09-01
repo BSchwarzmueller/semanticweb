@@ -1,7 +1,11 @@
 <template>
   <a class="panel-block">
     <section>
-      <article class="media" @click="showModal">
+      <!-- Unterkomponente für die Ansicht der einzelnen Suchergebnisse 
+           Werte können hier entsprechend der Klassendeklaration in /models
+           verwendet werden
+      --> 
+      <article class="media" @click="showModal"> <!-- @click entspricht OnKlick-Event - öffnet Modal in Map.vue -->
         <div class="media-left">
           <figure class="image is-64x64">
             <a class="image is-64x64" layout="row center-center"
@@ -51,6 +55,10 @@
 
   const wikidata = new Wikidata();
 
+  /*
+   * Gleiche Funktion wie in Map.vue
+   */
+
   function getData(query) {
     store.commit('load');
 
@@ -70,6 +78,7 @@
       });
   }
 
+  // Funktion für Query Nr. 2 - dynamische Anpassung an gewählte Universität bei Klick-Event
   function getProfs(id) {
     return `SELECT ?prof ?profLabel ?uni ?uniLabel ?fachbereich ?fachbereichLabel ?image
             WHERE
@@ -94,11 +103,13 @@
             array.findIndex(t => t.prof.value === element.prof.value) === index)
           .map(prof => new Professor(prof));
       });
-    store.commit('setSelectedPerson', this.person);
+      // Ändert den Zustand in der store.js. Werte können dann im Modal ausgelesen werden
+    store.commit('setSelectedPerson', this.person); // Ausgewählte Uni
     console.log('Uni gefunden: ', this.person);
-    store.commit('setSelectedProfs', this.profs);
+    store.commit('setSelectedProfs', this.profs); // Ergebnisse der Query Nr.2
     console.log('Professoren: ', this.profs);
     store.commit('showModal');
+    
   }
 
   export default {

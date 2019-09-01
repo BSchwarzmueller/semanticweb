@@ -10,6 +10,7 @@ export default class University {
   proflist;
 
   constructor(uni) {
+    console.log('uni: ', uni);
     this.id = uni.university.value.slice(31);
 
     try {
@@ -25,7 +26,7 @@ export default class University {
       this.name = uni.universityLabel.value;
     } catch (err) { /* safely ignore */ }
     try {
-      this.logo = decodeURIComponent(uni.logo.value.slice(51));
+      this.logo = decodeURIComponent(uni.logo.value.slice(51)); // Dateiname des Logos
     } catch (err) { /* safely ignore */ }
     try {
       this.employeesCount = uni.employeesCount.value;
@@ -34,7 +35,7 @@ export default class University {
       this.studentsCount = uni.studentsCount.value;
     } catch (err) { /* safely ignore */ }
     try {
-      this.inception = uni.inception.value.slice(0, 4);
+      this.inception = uni.inception.value.slice(0, 4); // Nur Jahreszahl
     } catch (err) { /* safely ignore */ }
   }
   get imageURL() {

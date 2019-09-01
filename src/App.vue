@@ -1,3 +1,5 @@
+<!--  Startpunkt einer jeden Onepage-App 
+      id-Element wird in der main.js mit der Funktionalität geladen --> 
 <template>
   <div id="gravemap">
     <gr-navbar/>

@@ -27,7 +27,7 @@ new Vue({
   router: new Router({
     routes: [
       { path: '/', redirect: '/map/@51.33519,12.36493,15z' },
-      { path: '/map', redirect: '/map/@51.33519,12.36493,15z' },
+      { path: '/map', redirect: '/map/@51.33519,12.36493,15z' }, // Map.vue laden in app Element
       { path: '/map/:position', name: 'Map', component: Map },
       { path: '/about', name: 'About', component: About },
     ],

@@ -21,3 +21,8 @@ export default new Vuex.Store({
     setSelectedProfs: (state, profs) => { state.selectedProfs = profs; },
   },
 });
+/*
+ * Diese Funktion hat die Aufgabe, Komponenten übergreifend Zustände an einem zentralen Punkt
+ * zu speichern. Durch entsprechende Event-Listener kann auf die Änderung eines Zustands
+ * reagiert werden
+ */
